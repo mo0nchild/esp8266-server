@@ -33,6 +33,11 @@ void setup() {
   });
 
   server.on("/data", HTTP_POST, [](AsyncWebServerRequest *req){
+    int args = req->args();
+    for(int i=0;i<args;i++){
+      Serial.printf("ARG[%s]: %s\n", req->argName(i).c_str(), req->arg(i).c_str());
+    }
+
     req->send_P(200, "text/plain", "hello-from-esp");
   });
 
