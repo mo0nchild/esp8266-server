@@ -12,8 +12,16 @@ MDNSResponder mdns;
 
 #include <client-html.h>
 
+#define ledR 2
+#define ledG 3
+#define ledB 4
+
+uint8_t ledColor[3] = {255, 255, 255}; 
+void setColor(uint8_t *color);
+
 void setup() {
   Serial.begin(115200);
+  ::setColor(ledColor);
 
   Serial.println("Setting Access Point...");
   WiFi.softAP(ssid, password);
@@ -36,8 +44,13 @@ void setup() {
     int args = req->args();
     for(int i=0;i<args;i++){
       Serial.printf("ARG[%s]: %s\n", req->argName(i).c_str(), req->arg(i).c_str());
+      switch(req->argName(i).c_str()[0]){
+        case 'R': ledColor[0] = req->arg(i).toInt(); break;
+        case 'G': ledColor[1] = req->arg(i).toInt(); break;
+        case 'B': ledColor[2] = req->arg(i).toInt(); break; 
+      }
     }
-
+    ::setColor(ledColor);
     req->send_P(200, "text/plain", "hello-from-esp");
   });
 
@@ -48,4 +61,13 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   mdns.update();
+}
+
+void setColor(uint8_t *color) {
+  for(uint8_t i = 0; i < 3; i++) Serial.printf("%d ", color[i]);
+  Serial.println("");
+
+  analogWrite(ledR, color[0]);
+  analogWrite(ledG, color[1]);
+  analogWrite(ledB, color[2]);
 }
